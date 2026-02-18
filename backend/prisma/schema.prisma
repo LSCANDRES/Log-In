@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+model User {
+  id                  String       @id @default(uuid())
+  email               String       @unique
+  password            String?      // null for OAuth users
+  firstName           String
+  lastName             String
+  role                Role         @default(USER)
+  provider            AuthProvider @default(LOCAL)
+  googleId            String?      @unique
+  avatarUrl           String?
+  isEmailVerified     Boolean      @default(false)
+  emailVerificationToken String?   @unique
+  emailVerificationExpires DateTime?
+  passwordResetToken  String?      @unique
+  passwordResetExpires DateTime?
+  refreshToken        String?
+  isActive            Boolean      @default(true)
+  lastLoginAt         DateTime?
+  lastLoginIp         String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  loginHistory        LoginHistory[]
+
+  @@map("users")
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // LOGIN_SUCCESS, LOGIN_FAILED, LOGOUT, etc.
+  ip        String?
+  userAgent String?
+  provider  String?  // LOCAL, GOOGLE
+  details   String?  // Additional info
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("login_history")
+}

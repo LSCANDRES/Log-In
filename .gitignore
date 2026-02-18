@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.production
+!.env.example
+backend/.env
+!backend/.env.example
+
+# Logs (only root and backend log directories)
+/logs/
+backend/logs/
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+
+# Angular
+.angular/
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes data (local)
+pgdata/

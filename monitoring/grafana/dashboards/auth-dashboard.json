@@ -1,0 +1,165 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{job=\"auth_backend\", action=~\"LOGIN_SUCCESS|LOGIN_FAILED|REGISTER|LOGOUT|TOKEN_REFRESH\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "🔐 Auth Events - All Login Activity",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 2,
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "count_over_time({job=\"auth_backend\", action=\"LOGIN_SUCCESS\"}[1h])",
+          "refId": "A"
+        }
+      ],
+      "title": "✅ Successful Logins (per hour)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 3,
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "count_over_time({job=\"auth_backend\", action=\"LOGIN_FAILED\"}[1h])",
+          "refId": "A"
+        }
+      ],
+      "title": "❌ Failed Logins (per hour)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 4,
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{job=\"auth_backend\", action=\"LOGIN_SUCCESS\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "👤 Who Logged In (Recent)",
+      "type": "logs",
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending"
+      }
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 5,
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{job=\"auth_backend\", action=\"LOGIN_FAILED\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "🚫 Who Failed to Login (Recent)",
+      "type": "logs",
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending"
+      }
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "id": 6,
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{job=\"auth_backend\", action=~\"GOOGLE_LOGIN_SUCCESS|GOOGLE_LOGIN_FAILED\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "🌐 Google OAuth Events",
+      "type": "logs",
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending"
+      }
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["auth", "login", "security"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Auth System - Login Monitoring",
+  "uid": "auth-login-monitoring",
+  "version": 1
+}
