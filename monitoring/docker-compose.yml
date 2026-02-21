@@ -1,0 +1,83 @@
+# ==========================================================
+# MONITORING STACK - Separado de la app principal
+# ==========================================================
+# Levantar:  docker-compose -f monitoring/docker-compose.yml up -d
+# Detener:   docker-compose -f monitoring/docker-compose.yml down
+# ==========================================================
+
+services:
+  # ==================== LOKI (almacena logs) ====================
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: mon_loki
+    restart: unless-stopped
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring_network
+
+  # ==================== PROMTAIL (recolecta logs del backend) ====================
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: mon_promtail
+    restart: unless-stopped
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - ../backend/logs:/var/log/backend:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - monitoring_network
+
+  # ==================== PROMETHEUS (recolecta métricas numéricas) ====================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: mon_prometheus
+    restart: unless-stopped
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring_network
+
+  # ==================== GRAFANA (visualiza todo) ====================
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: mon_grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - loki
+      - prometheus
+    networks:
+      - monitoring_network
+
+volumes:
+  loki_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring_network:
+    driver: bridge

@@ -73,58 +73,9 @@ services:
     networks:
       - auth_network
 
-  # ==================== MONITORING ====================
-  loki:
-    image: grafana/loki:2.9.0
-    container_name: auth_loki
-    restart: unless-stopped
-    ports:
-      - "${LOKI_PORT:-3100}:3100"
-    volumes:
-      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml
-      - loki_data:/loki
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - auth_network
-
-  promtail:
-    image: grafana/promtail:2.9.0
-    container_name: auth_promtail
-    restart: unless-stopped
-    volumes:
-      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml
-      - backend_logs:/var/log/backend
-    command: -config.file=/etc/promtail/config.yml
-    depends_on:
-      - loki
-      - backend
-    networks:
-      - auth_network
-
-  grafana:
-    image: grafana/grafana:10.2.0
-    container_name: auth_grafana
-    restart: unless-stopped
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
-      GF_USERS_ALLOW_SIGN_UP: "false"
-    ports:
-      - "${GRAFANA_PORT:-3001}:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
-    depends_on:
-      - loki
-    networks:
-      - auth_network
-
 volumes:
   postgres_data:
   backend_logs:
-  loki_data:
-  grafana_data:
 
 networks:
   auth_network:

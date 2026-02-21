@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LoggerService } from '../../logging/logger.service';
+import { MetricsService } from '../../metrics/metrics.service';
 import { EmailService } from './email.service';
 import { RegisterDto, LoginDto, GoogleAuthDto } from '../dto';
 import { JwtPayload } from '../strategies/jwt.strategy';
@@ -26,6 +27,7 @@ export class AuthService {
     private configService: ConfigService,
     private logger: LoggerService,
     private emailService: EmailService,
+    private metrics: MetricsService,
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -78,6 +80,9 @@ export class AuthService {
       success: true,
     });
 
+    // Prometheus metric
+    this.metrics.registerTotal.labels('success', 'LOCAL').inc();
+
     await this.prisma.loginHistory.create({
       data: {
         userId: user.id,
@@ -108,6 +113,9 @@ export class AuthService {
         details: 'User not found',
       });
 
+      // Prometheus metric
+      this.metrics.loginTotal.labels('failed', 'LOCAL').inc();
+
       await this.recordFailedLogin(dto.email, ip, userAgent, 'User not found');
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -123,6 +131,9 @@ export class AuthService {
         success: false,
         details: 'Invalid password',
       });
+
+      // Prometheus metric
+      this.metrics.loginTotal.labels('failed', 'LOCAL').inc();
 
       await this.prisma.loginHistory.create({
         data: {
@@ -169,6 +180,10 @@ export class AuthService {
       success: true,
     });
 
+    // Prometheus metrics
+    this.metrics.loginTotal.labels('success', 'LOCAL').inc();
+    this.metrics.activeUsersGauge.inc();
+
     await this.prisma.loginHistory.create({
       data: {
         userId: user.id,
@@ -209,6 +224,10 @@ export class AuthService {
         success: false,
         details: 'Invalid Google token',
       });
+
+      // Prometheus metric
+      this.metrics.loginTotal.labels('failed', 'GOOGLE').inc();
+
       throw new UnauthorizedException('Invalid Google token');
     }
 
@@ -242,6 +261,9 @@ export class AuthService {
         provider: 'GOOGLE',
         success: true,
       });
+
+      // Prometheus metric
+      this.metrics.registerTotal.labels('success', 'GOOGLE').inc();
     } else if (!user.googleId) {
       // Link Google to existing account
       user = await this.prisma.user.update({
@@ -274,6 +296,10 @@ export class AuthService {
       provider: 'GOOGLE',
       success: true,
     });
+
+    // Prometheus metrics
+    this.metrics.loginTotal.labels('success', 'GOOGLE').inc();
+    this.metrics.activeUsersGauge.inc();
 
     await this.prisma.loginHistory.create({
       data: {
@@ -326,6 +352,9 @@ export class AuthService {
       email: user.email,
       success: true,
     });
+
+    // Prometheus metric
+    this.metrics.emailVerificationTotal.labels('success').inc();
 
     return { message: 'Email verified successfully' };
   }
@@ -396,6 +425,9 @@ export class AuthService {
       success: true,
     });
 
+    // Prometheus metric
+    this.metrics.tokenRefreshTotal.labels('success').inc();
+
     return tokens;
   }
 
@@ -416,6 +448,10 @@ export class AuthService {
       ip,
       success: true,
     });
+
+    // Prometheus metrics
+    this.metrics.logoutTotal.inc();
+    this.metrics.activeUsersGauge.dec();
 
     await this.prisma.loginHistory.create({
       data: {

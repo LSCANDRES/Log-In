@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { Observable, tap, catchError, throwError, of, delay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.models';
 
@@ -159,5 +159,49 @@ export class AuthService {
     } else {
       this.router.navigate(['/user/profile']);
     }
+  }
+
+  // ==================== SIMULATE LOGIN (DEV/TESTING) ====================
+  simulateLogin(role: 'ADMIN' | 'USER'): void {
+    this.isLoadingSignal.set(true);
+
+    const mockUsers: Record<string, User> = {
+      ADMIN: {
+        id: 'mock-admin-001',
+        email: 'admin@authbase.com',
+        firstName: 'Admin',
+        lastName: 'System',
+        role: 'ADMIN',
+        provider: 'LOCAL',
+        isEmailVerified: true,
+        isActive: true,
+        avatarUrl: undefined,
+      },
+      USER: {
+        id: 'mock-user-001',
+        email: 'user@authbase.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'USER',
+        provider: 'LOCAL',
+        isEmailVerified: true,
+        isActive: true,
+        avatarUrl: undefined,
+      },
+    };
+
+    const user = mockUsers[role];
+    const mockResponse: AuthResponse = {
+      user,
+      accessToken: 'mock-access-token-' + role.toLowerCase(),
+      refreshToken: 'mock-refresh-token-' + role.toLowerCase(),
+    };
+
+    // Simulate a small delay for UX
+    setTimeout(() => {
+      this.handleAuthSuccess(mockResponse);
+      this.isLoadingSignal.set(false);
+      this.navigateByRole();
+    }, 500);
   }
 }

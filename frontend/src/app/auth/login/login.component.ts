@@ -77,19 +77,32 @@ import { AuthService } from '../../core/services/auth.service';
           <p>Don't have an account? <a routerLink="/auth/register">Sign Up</a></p>
         </div>
 
-        <!-- Quick test buttons -->
-        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #ddd;">
-          <p style="text-align: center; color: #999; font-size: 12px; margin-bottom: 12px;">
-            🧪 Quick Test Login
+        <!-- Quick test buttons - SIMULATE LOGIN -->
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 2px dashed #e0e0e0;">
+          <p style="text-align: center; color: #888; font-size: 13px; margin-bottom: 16px; font-weight: 500;">
+            🧪 Simulación de Login (Testing)
           </p>
-          <div style="display: flex; gap: 8px;">
-            <button mat-stroked-button color="warn" style="flex: 1;" (click)="quickLogin('admin')">
-              <mat-icon>admin_panel_settings</mat-icon>
-              Admin
+          <div style="display: flex; gap: 12px;">
+            <!-- ADMIN BUTTON -->
+            <button mat-raised-button
+                    style="flex: 1; padding: 16px 8px; height: auto; background: linear-gradient(135deg, #ff5722, #e64a19); color: white; border-radius: 12px;"
+                    (click)="simulateAs('ADMIN')">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <mat-icon style="font-size: 40px; height: 40px; width: 40px;">admin_panel_settings</mat-icon>
+                <span style="font-size: 16px; font-weight: 600;">Admin</span>
+                <span style="font-size: 11px; opacity: 0.85;">Dashboard · Usuarios · Logs</span>
+              </div>
             </button>
-            <button mat-stroked-button color="accent" style="flex: 1;" (click)="quickLogin('user')">
-              <mat-icon>person</mat-icon>
-              User
+
+            <!-- USER BUTTON -->
+            <button mat-raised-button
+                    style="flex: 1; padding: 16px 8px; height: auto; background: linear-gradient(135deg, #2196F3, #1565c0); color: white; border-radius: 12px;"
+                    (click)="simulateAs('USER')">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <mat-icon style="font-size: 40px; height: 40px; width: 40px;">person</mat-icon>
+                <span style="font-size: 16px; font-weight: 600;">Usuario</span>
+                <span style="font-size: 11px; opacity: 0.85;">Mi Perfil</span>
+              </div>
             </button>
           </div>
         </div>
@@ -140,12 +153,7 @@ export class LoginComponent {
     });
   }
 
-  quickLogin(role: 'admin' | 'user'): void {
-    const credentials = role === 'admin'
-      ? { email: 'admin@authbase.com', password: 'Admin123!' }
-      : { email: 'user@authbase.com', password: 'User123!' };
-
-    this.loginForm.patchValue(credentials);
-    this.onSubmit();
+  simulateAs(role: 'ADMIN' | 'USER'): void {
+    this.authService.simulateLogin(role);
   }
 }

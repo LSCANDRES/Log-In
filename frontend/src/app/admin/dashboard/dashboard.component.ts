@@ -115,6 +115,15 @@ export class DashboardComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
+        // Fallback mock stats for simulated login
+        this.stats = {
+          totalUsers: 2,
+          activeUsers: 2,
+          adminUsers: 1,
+          regularUsers: 1,
+          verifiedUsers: 2,
+          todayLogins: 1,
+        };
         this.isLoading = false;
       },
     });

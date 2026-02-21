@@ -156,6 +156,8 @@ export class ProfileComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
+        // Fallback: use current user from signal (works for simulated login)
+        this.profile = this.authService.currentUser();
         this.isLoading = false;
       },
     });

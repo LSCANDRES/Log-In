@@ -1,0 +1,30 @@
+# ==========================================================
+# PROMETHEUS - Configuración de scraping de métricas
+# ==========================================================
+# Prometheus se conecta al backend cada 15s y lee /api/metrics
+# para obtener contadores numéricos (logins, errores, latencia)
+# ==========================================================
+
+global:
+  scrape_interval: 15s          # Cada 15 segundos lee métricas
+  evaluation_interval: 15s      # Cada 15 segundos evalúa reglas
+  scrape_timeout: 10s           # Timeout por scrape
+
+scrape_configs:
+  # ---- Métricas del propio Prometheus ----
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ---- Métricas del Backend NestJS ----
+  # El backend expone métricas en GET /api/metrics
+  # Prometheus se conecta y las lee automáticamente
+  - job_name: 'auth_backend'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+        labels:
+          app: 'auth-base'
+          environment: 'development'
+    # En producción con Docker, cambiar target a:
+    # - targets: ['auth_backend:3000']

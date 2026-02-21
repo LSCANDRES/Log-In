@@ -131,6 +131,11 @@ export class UsersListComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
+        // Fallback mock users for simulated login
+        this.users = [
+          { id: 'mock-admin-001', email: 'admin@authbase.com', firstName: 'Admin', lastName: 'System', role: 'ADMIN', provider: 'LOCAL', isEmailVerified: true, isActive: true },
+          { id: 'mock-user-001', email: 'user@authbase.com', firstName: 'John', lastName: 'Doe', role: 'USER', provider: 'LOCAL', isEmailVerified: true, isActive: true },
+        ];
         this.isLoading = false;
       },
     });

@@ -111,6 +111,12 @@ export class LogsComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
+        // Fallback mock logs for simulated login
+        this.logs = [
+          { id: '1', userId: 'mock-admin-001', action: 'LOGIN_SUCCESS', provider: 'LOCAL', ip: '127.0.0.1', details: 'Simulated admin login', createdAt: new Date().toISOString() },
+          { id: '2', userId: 'mock-user-001', action: 'LOGIN_SUCCESS', provider: 'LOCAL', ip: '127.0.0.1', details: 'Simulated user login', createdAt: new Date().toISOString() },
+          { id: '3', userId: 'mock-user-001', action: 'LOGIN_FAILED', provider: 'LOCAL', ip: '192.168.1.10', details: 'Invalid credentials', createdAt: new Date(Date.now() - 3600000).toISOString() },
+        ];
         this.isLoading = false;
       },
     });

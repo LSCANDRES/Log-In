@@ -7,6 +7,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getAccessToken();
 
+  // Skip real API calls when using simulated mock tokens
+  const isMockToken = token?.startsWith('mock-');
+
   // Don't add token to auth requests (except logout/profile)
   const isAuthRequest = req.url.includes('/auth/login') ||
     req.url.includes('/auth/register') ||
@@ -24,6 +27,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // If using mock tokens, don't try to refresh or logout on errors
+      if (isMockToken) {
+        return throwError(() => error);
+      }
+
       if (error.status === 401 && !req.url.includes('/auth/')) {
         // Try to refresh token
         return authService.refreshToken().pipe(

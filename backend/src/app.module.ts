@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule } from './logging/logging.module';
+import { MetricsModule } from './metrics/metrics.module';
 import { configValidationSchema } from './config/config.validation';
 
 @Module({
@@ -15,6 +16,7 @@ import { configValidationSchema } from './config/config.validation';
     }),
     PrismaModule,
     LoggingModule,
+    MetricsModule,
     AuthModule,
     UsersModule,
   ],
